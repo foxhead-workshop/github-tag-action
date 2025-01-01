@@ -1,0 +1,35 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    - cron: "0 2 * * *" # Runs daily at 2 AM UTC
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the Fork
+      - name: Checkout Fork
+        uses: actions/checkout@v3
+        with:
+          ref: main # Adjust if your fork's default branch is not "main"
+
+      # Step 2: Add Upstream Remote
+      - name: Add Upstream Remote
+        run: |
+          git remote add upstream https://github.com/anothrNick/github-tag-action.git
+          git fetch upstream
+
+      # Step 3: Merge Changes from Upstream
+      - name: Merge Upstream Changes
+        run: |
+          git merge upstream/main --no-edit
+
+      # Step 4: Push Changes to Fork
+      - name: Push Changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
